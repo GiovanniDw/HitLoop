@@ -13,7 +13,6 @@ export const getSampleUrl = (BASE_URL, samplePack, file) => {
     let samplePackQuery = `?sample_pack=${samplePack}`
     let fileQuery = `&file=${file}`
     const fileURL = ref(BASE_URL + sampleFilePath + samplePackQuery + fileQuery)
-    console.log(fileURL.value)
     return fileURL.value
   } catch (error) {
     console.error(error)
@@ -25,8 +24,6 @@ export const getSampleFile = async (fileURL) => {
     const { data, error, isFetching } = await useFetch(fileURL).blob()
     if (data || !isFetching) {
       const sampleUrl = useObjectUrl(data)
-      console.log(sampleUrl)
-      console.log(data)
       return sampleUrl
     }
   } catch (error) {

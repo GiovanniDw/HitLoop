@@ -60,48 +60,126 @@ let samples = new Tone.Players({
 })
 const isBlobReady = ref(false)
 
+// let sampler
+
 let sampler = new Tone.Sampler({
-  urls: store.sampleObject,
+      urls: store.sampleObject,
   onload: () => {
-    // for (const row of sequenceData.value) {
-    //   if (row.steps[col]) {
-    //     notesToPlay.value.push(row.sample)
-    //   }
-    // }
-    // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
-  }
-})
+        console.log('1st sampler done')
+        // for (const row of sequenceData.value) {
+        //   console.log(row.steps[col])
+        //   if (row.steps[col]) {
+        //     // notesToPlay.value.push(row.sample)
+            
+        //     playNote({
+        //       detail: {
+        //         item: row,
+        //         time: time
+        //       }
+        //     })
+            
+        //   }
+        // }
+        // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
+      }
+    }).toDestination()
+
 
 const configSequence = () => {
   // let chor = new Tone.Chorus(chorus.value).toDestination()
-
+  // sampler = new Tone.Sampler({
+  //     urls: store.sampleObject,
+  //     onload: () => {
+  //     console.log('loaded')
+  //       // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
+  //     }
+  //   }).toDestination()
   // tick is callback function which is runned every
-  const tick = (time, col) => {
+  // const tick = (time, col) => {
+  //   sampler = new Tone.Sampler({
+  //     urls: store.sampleObject,
+  //     onload: () => {
+  //       for (const row of sequenceData.value) {
+  //         console.log(row.steps[col])
+  //         if (row.steps[col]) {
+  //           // notesToPlay.value.push(row.sample)
+            
+  //           playNote({
+  //             detail: {
+  //               item: row,
+  //               time: time
+  //             }
+  //           })
+            
+  //         }
+  //       }
+  //       // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
+  //     }
+  //   }).toDestination()
+    
+
+  //   // console.log(col)
+  //   Tone.Draw.schedule(() => {
+  //     if (isPlaying.value) {
+  //       setCurrentStepIndex(col)
+  //     }
+  //   }, time)
+
+  //   let notesToPlay = ref([])
+  //   notesToPlay.value = []
+
+  //   // let rev = new Tone.Reverb(reverb.value).toDestination()
+  //   // sampler.chain(rev, Tone.Destination)
+  //   // console.log(reverb.value)
+  //   // console.log(chorus.value)
+
+  //   // Tone.loaded().then(() => {
+  //   //   sampler.sync()
+  //   //   sampler.toDestination()
+  //   // })
+  //   // sampler.triggerAttackRelease(notesToPlay.value, '16n', time).sync()
+  // }
+  
+  sequence.humanize = true
+
+  console.log(sequence.get())
+}
+
+const tick = (time, col) => {
+
     // console.log(col)
     Tone.Draw.schedule(() => {
       if (isPlaying.value) {
         setCurrentStepIndex(col)
       }
     }, time)
-    let notesToPlay = ref([])
-    notesToPlay.value = []
+
+
     sampler = new Tone.Sampler({
       urls: store.sampleObject,
       onload: () => {
         for (const row of sequenceData.value) {
+          console.log(row.steps[col])
           if (row.steps[col]) {
             // notesToPlay.value.push(row.sample)
+            
             playNote({
               detail: {
                 item: row,
                 time: time
               }
             })
+            
           }
         }
         // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
       }
     }).toDestination()
+    
+
+
+    let notesToPlay = ref([])
+    notesToPlay.value = []
 
     // let rev = new Tone.Reverb(reverb.value).toDestination()
     // sampler.chain(rev, Tone.Destination)
@@ -114,24 +192,21 @@ const configSequence = () => {
     // })
     // sampler.triggerAttackRelease(notesToPlay.value, '16n', time).sync()
   }
-  sequence = new Tone.Sequence(tick, createSequenceArrayIndex(columns.value), '16n')
-  sequence.humanize = true
 
-  console.log(sequence.get())
+sequence = new Tone.Sequence(tick, createSequenceArrayIndex(columns.value), '16n').start()
 
-  // watchEffect(() => {
-  //   if (sequence) {
-  //     sequence.dispose();
-  //   }
-  //   sequence = new Tone.Sequence(tick, createSequenceArrayIndex(columns.value), '16n')
-  // });
-}
+
 
 function playNote({ detail }) {
-  let rev = new Tone.Reverb(reverb.value).toDestination()
-  sampler.sync()
+  
+  
+  if (reverb.value.decay !== 0) {
+    let rev = new Tone.Reverb(reverb.value).toDestination()
+    sampler.chain(rev, Tone.Destination)
+  }
+  console.log(`playnote: ${detail.item.sample}`)
   sampler.triggerAttackRelease(detail.item.sample, '16n', detail.time)
-  sampler.chain(rev, Tone.Destination)
+  
 }
 
 Tone.Transport.bpm.value = bpm.value
@@ -143,32 +218,36 @@ watch(bpm, (newBpm) => {
 
 const setToneStart = async () => {
   if (!isStarted.value) {
-    await Tone.start()
+    await setStarted()
     Tone.getDestination().volume.rampTo(-10, 0.001)
-    setStarted()
+    
     // togglePlay()
+    return
   }
 }
 
 const togglePlay = (e) => {
-  setToneStart(e)
+  let now = Tone.now()
   // Tone.Transport.stop()
 
-  // if (!isStarted.value) return
-
-  let now = Tone.now()
+  if (!isStarted.value) {
+ setToneStart(e)
+  }
+  
   togglePlayPause()
+  
+  
   if (isPlaying.value) {
     // get current time
-    let now = Tone.now()
+    
     //set playtime to current time
     // playtime is state
     playTime.value = now
     //start sequence +0.1 in the fututre
+    
     Tone.Transport.start()
-    sequence.start(0)
+    sequence.start()
   } else {
-    playTime.value = Tone.now()
     Tone.Transport.pause()
     // sequence.stop()
   }
@@ -180,6 +259,19 @@ const onKeyDown = (event) => {
     event.preventDefault()
   }
 }
+
+watch(
+  () => store.sampleObject,
+  () => {
+    // fires only when state.someObject is replaced
+    if (sequence) {
+      sequence.dispose()
+      sequence = new Tone.Sequence(tick, createSequenceArrayIndex(columns.value), '16n').start(Tone.TransportTime())
+    }
+    
+
+  }
+)
 
 watchEffect(() => {
   bpm.value
@@ -244,7 +336,7 @@ onUnmounted(() => {
 .controlls {
   display: flex;
   position: sticky;
-  bottom: 1em;
+  bottom: .5em;
   z-index: 2;
   justify-content: end;
   align-items: center;
@@ -254,7 +346,7 @@ onUnmounted(() => {
   height: 7rem;
   background-color: var(--color-background);
   border-radius: 8px;
-  padding: 2em;
+  padding: var(--padding-l);
 }
 .sequencer {
   position: relative;

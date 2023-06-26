@@ -16,7 +16,7 @@ export const useSequenceStore = defineStore('sequence', () => {
   const isStarted = ref(false)
   async function setStarted() {
     await Tone.start()
-    isStarted.value = true
+    return isStarted.value = true
   }
   const currentStepIndex = ref(-1)
   function setCurrentStepIndex(i) {
@@ -28,10 +28,10 @@ export const useSequenceStore = defineStore('sequence', () => {
     if (bpm.value < 300) bpm.value = bpm.value + 10
   }
   function lessBPM() {
-    bpm.value = bpm.value - 10
+    if (bpm.value > 10) bpm.value = bpm.value - 10
   }
   const reverb = ref({
-    decay: 0.001,
+    decay: 0.0,
     preDelay: 0.01
   })
 
@@ -69,6 +69,7 @@ export const useSequenceStore = defineStore('sequence', () => {
     return [
       {
         id: 0,
+        sampleId: 0,
         sample: 'A3',
         steps: createSequenceArraySteps(columns.value),
         url: 'https://api-hitloop.responsible-it.nl/test_samples?sample_pack=b&file=crash_1_0_IJ-pont_varen.wav',
@@ -90,14 +91,10 @@ export const useSequenceStore = defineStore('sequence', () => {
   async function setSampleData() {
     try {
       const data = await getSampleData(apiBaseURL, samplePack.value, 'list')
-      console.log(data.value)
-
       await data.value.forEach(async (sample, i) => {
         let blob = await getSampleFile(sample.url)
         sample.blob = blob.value
       })
-      console.log(data.value)
-
       return (sampleData.value = data.value)
       // return sampleData.value
     } catch (error) {
@@ -146,6 +143,7 @@ export const useSequenceStore = defineStore('sequence', () => {
     // activeNotes.value.push(thisSample)
     sequenceData.value.push({
       id: newId,
+      sampleId: sampleData.value[0].id,
       sample: uniqueNote,
       steps: createSequenceArraySteps(columns.value),
       url: getSampleUrl(apiBaseURL, samplePack.value, sampleData.value[0].file),
@@ -167,7 +165,7 @@ export const useSequenceStore = defineStore('sequence', () => {
   // }
   const sampleObject = computed(() => {
     const newObj = {}
-    if (sequenceData.value && sequenceData.value && Array.isArray(sequenceData.value)) {
+    if (sequenceData.value) {
       sequenceData.value.forEach((obj) => {
         if (obj && obj.sample && obj.url) {
           newObj[obj.sample] = obj.url
@@ -178,9 +176,9 @@ export const useSequenceStore = defineStore('sequence', () => {
   })
   const playersObject = computed(() => {
     const newObj = {}
-    if (sequenceData.value && sequenceData.value && Array.isArray(sequenceData.value)) {
-      sequenceData.value.forEach((obj) => {
-        if (obj && obj.sample && obj.url) {
+    if (sampleData.value) {
+      sampleData.value.forEach((obj) => {
+        if (obj && obj.url) {
           newObj[obj.id] = obj.url
         }
       })
@@ -194,7 +192,6 @@ export const useSequenceStore = defineStore('sequence', () => {
     return (row.steps[step] = !row.steps[step])
   }
   const updateSequenceURL = async (index, newUrl) => {
-    console.log(newUrl)
     return (sequenceData.value[index].url = newUrl)
   }
 
