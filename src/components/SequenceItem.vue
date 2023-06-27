@@ -17,7 +17,7 @@ const store = useSequenceStore()
 // store values to vuejs ref
 const { samplePack, currentStepIndex, sequenceData, sampleTypeList } = storeToRefs(store)
 
-const { toggleStep, updateSequenceURL, removeSequence } = store
+const { toggleStep, updateSequenceURL, removeSequence, updateSequenceByValue } = store
 </script>
 <template>
   <div class="sequence-item">
@@ -26,6 +26,7 @@ const { toggleStep, updateSequenceURL, removeSequence } = store
         <SampleSelect
           class="sample-select"
           @update:url="updateSequenceURL(id, $event)"
+          @update:id="updateSequenceByValue(id, $event)"
           :item="item"
           :id="id"
         />

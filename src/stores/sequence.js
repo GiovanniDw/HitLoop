@@ -8,15 +8,33 @@ import {
 } from '@/helpers/toneHelpers.js'
 
 import { getSampleData, getSampleFile, getSampleUrl } from '@/composables/getSampleData.js'
-import { useCycleList } from '@vueuse/core'
+import { useCycleList, useToNumber } from '@vueuse/core'
 
 const apiBaseURL = import.meta.env.VITE_API_BASE
 
 export const useSequenceStore = defineStore('sequence', () => {
   const isStarted = ref(false)
-  async function setStarted() {
-    await Tone.start()
-    return isStarted.value = true
+  const isSamplesLoaded = computed(() => {
+   return samplesIsLoaded.value
+  })
+
+  const samplesIsLoaded = ref(false)
+
+  function setSamplesLoaded(value) {
+  return  samplesIsLoaded.value = value
+  }
+
+  async function setStarted(value) {
+    try {
+      await Tone.start()
+      if (value === true) {
+        return isStarted.value = true
+      } else if (value === false) {
+        return isStarted.value = false
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
   const currentStepIndex = ref(-1)
   function setCurrentStepIndex(i) {
@@ -69,7 +87,7 @@ export const useSequenceStore = defineStore('sequence', () => {
     return [
       {
         id: 0,
-        sampleId: 0,
+        sampleId: 31,
         sample: 'A3',
         steps: createSequenceArraySteps(columns.value),
         url: 'https://api-hitloop.responsible-it.nl/test_samples?sample_pack=b&file=crash_1_0_IJ-pont_varen.wav',
@@ -143,7 +161,7 @@ export const useSequenceStore = defineStore('sequence', () => {
     // activeNotes.value.push(thisSample)
     sequenceData.value.push({
       id: newId,
-      sampleId: sampleData.value[0].id,
+      sampleId: 31,
       sample: uniqueNote,
       steps: createSequenceArraySteps(columns.value),
       url: getSampleUrl(apiBaseURL, samplePack.value, sampleData.value[0].file),
@@ -174,8 +192,22 @@ export const useSequenceStore = defineStore('sequence', () => {
     }
     return newObj
   })
+
+
+  const playersMidiObject = computed(() => {
+    const newObj = reactive({})
+    if (sampleData.value) {
+      sampleData.value.forEach((obj) => {
+        if (obj && obj.url) {
+          newObj[obj.note] = obj.url
+        }
+      })
+    }
+    return newObj
+  })
+
   const playersObject = computed(() => {
-    const newObj = {}
+    const newObj = reactive({})
     if (sampleData.value) {
       sampleData.value.forEach((obj) => {
         if (obj && obj.url) {
@@ -191,10 +223,17 @@ export const useSequenceStore = defineStore('sequence', () => {
   function toggleStep(row, step) {
     return (row.steps[step] = !row.steps[step])
   }
-  const updateSequenceURL = async (index, newUrl) => {
-    return (sequenceData.value[index].url = newUrl)
+  const updateSequenceURL = async (id, newUrl) => {
+    return (sequenceData.value[id].url = newUrl)
   }
 
+  const updateSequenceByValue = async (id, newValue) => {
+let newNum = useToNumber(newValue)
+    return sequenceData.value[id].sampleId = newNum
+  }
+
+
+  
   const togglePlayPause = (val) => {
     isPlaying.value = !isPlaying.value
   }
@@ -236,6 +275,11 @@ export const useSequenceStore = defineStore('sequence', () => {
     chorusType,
     isSampleDataReady,
     removeSequence,
-    playersObject
+    playersObject,
+    setSamplesLoaded,
+    isSamplesLoaded,
+    updateSequenceByValue,
+    samplesIsLoaded,
+    playersMidiObject
   }
 })
