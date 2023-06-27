@@ -22,7 +22,6 @@ const store = useSequenceStore()
 import InputBpm from '@/components/InputBpm.vue'
 import { createSequenceArrayIndex } from '@/helpers/toneHelpers.js'
 
-import BaseIcon from '@/components/BaseIcon.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import SequenceItem from '@/components/SequenceItem.vue'
 import SequenceItemControl from '@/components/SequenceItemControl.vue'
@@ -45,14 +44,7 @@ const {
   isSamplesLoaded
 } = storeToRefs(store)
 
-const {
-  toggleStep,
-  setStarted,
-  addSequence,
-  togglePlayPause,
-  setCurrentStepIndex,
-  setSamplesLoaded
-} = store
+const { setStarted, addSequence, togglePlayPause, setCurrentStepIndex, setSamplesLoaded } = store
 
 // Base url for the api
 
@@ -69,33 +61,13 @@ let samples = new Tone.Sampler({
     console.log('onload players')
     setSamplesLoaded(true)
   }
-}).toDestination()
-
-
-const isBlobReady = ref(false)
-
+})
 // let sampler
 
 let sampler = new Tone.Sampler({
   urls: store.sampleObject,
   onload: () => {
     console.log('1st sampler done')
-    // setSamplesLoaded(true)
-    // for (const row of sequenceData.value) {
-    //   console.log(row.steps[col])
-    //   if (row.steps[col]) {
-    //     // notesToPlay.value.push(row.sample)
-
-    //     playNote({
-    //       detail: {
-    //         item: row,
-    //         time: time
-    //       }
-    //     })
-
-    //   }
-    // }
-    // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
   }
 }).toDestination()
 
@@ -153,76 +125,45 @@ const configSequence = () => {
   //   // sampler.triggerAttackRelease(notesToPlay.value, '16n', time).sync()
   // }
 
-  sequence.humanize = true
+  // sequence.humanize = true
 
   console.log(sequence.get())
 }
 
 const tick = (time, col) => {
-  console.log('col')
-  console.log(col)
-
-  // sampler = new Tone.Sampler({
-  //   urls: store.sampleObject,
-  //   onload: () => {
-
-  //     // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
-  //   }
-  // }).toDestination()
-
-  // console.log(col)
   Tone.Draw.schedule(() => {
     if (isPlaying.value) {
       setCurrentStepIndex(col)
     }
   }, time)
   // samples.sync()
-  for (const row of sequenceData.value) {
-    console.log(row.steps[col])
-    if (row.steps[col]) {
-      // notesToPlay.value.push(row.sample)
 
+  for (const row of sequenceData.value) {
+    if (row.steps[col]) {
       playNote({
         detail: {
           item: row,
           time: time
-        },
-        composed: true
+        }
       })
     }
   }
-
-  let notesToPlay = ref([])
-  notesToPlay.value = []
-
-  // let rev = new Tone.Reverb(reverb.value).toDestination()
-  // sampler.chain(rev, Tone.Destination)
-  // console.log(reverb.value)
-  // console.log(chorus.value)
-
-  // Tone.loaded().then(() => {
-  //   sampler.sync()
-  //   sampler.toDestination()
-  // })
-  // sampler.triggerAttackRelease(notesToPlay.value, '16n', time).sync()
 }
 
-sequence = new Tone.Sequence(tick, createSequenceArrayIndex(columns.value), '16n').start(Tone.now())
+sequence = new Tone.Sequence(tick, createSequenceArrayIndex(columns.value), '16n').start('+0.001')
 sequence.humanize = true
 
 function playNote({ detail }) {
-  
-  if (reverb.value.decay !== 0) {
-    let rev = new Tone.Reverb(reverb.value)
-    rev.toDestination()
-    samples.connect(rev)
-    samples.set({
+  // samples.toDestination()
 
-    })
+  if (reverb.value.decay !== 0) {
+    const rev = new Tone.Reverb().toDestination()
+    rev.set(reverb.value)
+    samples.chain(rev, Tone.Destination)
+
     // samples.player(detail.item.sampleId)
   }
-  
-  samples.triggerAttackRelease(detail.item.sampleId, '16n', detail.time)
+  samples.triggerAttackRelease(detail.item.sampleId, '16n', detail.time).toDestination()
   //  samples.player(detail.item.sampleId, 0, detail.time, 0.5)
   // samples.player(detail.item.sampleId).start(detail.time, '+0.001', '16n')
 }
@@ -256,13 +197,12 @@ const togglePlay = (e) => {
 
   if (isPlaying.value) {
     // get current time
-
     //set playtime to current time
     // playtime is state
     playTime.value = now
     //start sequence +0.1 in the fututre
 
-    Tone.Transport.start()
+    Tone.Transport.start('+0.001')
     // sequence.start()
   } else {
     Tone.Transport.pause()
@@ -278,7 +218,7 @@ const onKeyDown = (event) => {
 }
 
 watch(
-  () => store.sequenceData.value,
+  () => store.sequenceData,
   () => {
     // fires only when state.someObject is replaced
     if (sequence) {
@@ -287,31 +227,16 @@ watch(
         Tone.now()
       )
     }
-    if (sampler === 'none') {
-      sampler.dispose()
-      sampler = new Tone.Sampler({
-        urls: store.sampleObject,
+    if (samples) {
+      samples.dispose()
+      samples = new Tone.Sampler({
+        urls: store.playersMidiObject,
         onload: () => {
           console.log('2st sampler done')
-          // for (const row of sequenceData.value) {
-          //   console.log(row.steps[col])
-          //   if (row.steps[col]) {
-          //     // notesToPlay.value.push(row.sample)
-
-          //     playNote({
-          //       detail: {
-          //         item: row,
-          //         time: time
-          //       }
-          //     })
-
-          //   }
-          // }
-          // sampler.triggerAttackRelease(notesToPlay.value, '16n', Tone.now()).sync()
         }
       }).toDestination()
 
-      sampler.sync()
+      // sampler.sync()
     }
   }
 )
@@ -328,7 +253,7 @@ watchEffect(() => {
 
 onMounted(() => {
   // Tone.start()
-  configSequence()
+  // configSequence()
   Tone.Transport.on('start', () => setStarted(true))
   Tone.Transport.on('stop', () => {
     setCurrentStepIndex(-1)

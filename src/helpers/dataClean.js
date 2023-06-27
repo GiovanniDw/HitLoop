@@ -21,7 +21,7 @@ export const createSampleObjectList = async (sampleData, url) => {
           const note = getValidMidiNoteFromId(currentNote) // Get a valid MIDI note value based on currentNote
           if (note === null) {
             // If there are no available MIDI notes, skip this sample
-            return null;
+            return null
           }
           const encodedStr = encodeURIComponent(str)
           // const nameCaseChange = useChangeCase(nameOnly, 'capitalCase')
@@ -35,10 +35,10 @@ export const createSampleObjectList = async (sampleData, url) => {
             note: note
           }
           id++
-          currentNote = currentNote % 12 === 7 ? currentNote + 1 : currentNote + 2;
+          currentNote = currentNote % 12 === 7 ? currentNote + 1 : currentNote + 2
           if (currentNote > 127) {
             // Reset currentNote if it exceeds the maximum MIDI note value
-            currentNote = 21;
+            currentNote = 21
           }
           return sampleObject
         } catch (error) {
@@ -79,25 +79,23 @@ const loadSampleBuffers = async (sampleObjectList) => {
   }
 }
 
-
-
 const getValidMidiNoteFromId = (id) => {
-  const octave = Math.floor((id - 1) / 7); // Determine the octave based on the ID
-  const noteIndex = (id - 1) % 7; // Determine the index within the octave based on the ID
-  const noteMap = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-  const note = noteMap[noteIndex];
-  const midiNote = octave * 12 + noteToMidiOffset(note);
+  const octave = Math.floor((id - 1) / 7) // Determine the octave based on the ID
+  const noteIndex = (id - 1) % 7 // Determine the index within the octave based on the ID
+  const noteMap = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+  const note = noteMap[noteIndex]
+  const midiNote = octave * 12 + noteToMidiOffset(note)
 
   // Check if the MIDI note is within the valid range (0-127)
   if (midiNote >= 0 && midiNote <= 127) {
-    return midiNote;
+    return midiNote
   } else {
-    return null; // Return null if the MIDI note is out of range
+    return null // Return null if the MIDI note is out of range
   }
 }
 
 // Function to get the MIDI offset for a specific note (assuming A = 0, B = 1, C = 2, etc.)
 const noteToMidiOffset = (note) => {
-  const noteMap = { A: 9, B: 11, C: 0, D: 2, E: 4, F: 5, G: 7 };
-  return noteMap[note.toUpperCase()];
+  const noteMap = { A: 9, B: 11, C: 0, D: 2, E: 4, F: 5, G: 7 }
+  return noteMap[note.toUpperCase()]
 }

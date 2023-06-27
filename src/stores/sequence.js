@@ -15,22 +15,23 @@ const apiBaseURL = import.meta.env.VITE_API_BASE
 export const useSequenceStore = defineStore('sequence', () => {
   const isStarted = ref(false)
   const isSamplesLoaded = computed(() => {
-   return samplesIsLoaded.value
+    return samplesIsLoaded.value
   })
 
   const samplesIsLoaded = ref(false)
 
   function setSamplesLoaded(value) {
-  return  samplesIsLoaded.value = value
+    return (samplesIsLoaded.value = value)
   }
 
   async function setStarted(value) {
     try {
       await Tone.start()
+      console.log('context started')
       if (value === true) {
-        return isStarted.value = true
+        return (isStarted.value = true)
       } else if (value === false) {
-        return isStarted.value = false
+        return (isStarted.value = false)
       }
     } catch (error) {
       console.log(error)
@@ -124,23 +125,6 @@ export const useSequenceStore = defineStore('sequence', () => {
   // creates sequence data array. based on active notes
   setSampleData()
 
-  // async function setSequenceData() {
-  //   try {
-  //     await setSampleData()
-
-  //     return (sequenceData.value = activeNotes.value.map((sample) => ({
-  //       sample,
-  //       steps: createSequenceArraySteps(columns.value),
-  //       url: getSampleUrl(apiBaseURL, samplePack.value, sampleData.value[0].file),
-  //       color: 'red'
-  //     })))
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }
-
-  // // setSampleData()
-  // setSequenceData()
   // adds a sequence to sequenceData array
   const addSequence = () => {
     const uniqueNote = availableNotes.value[sequenceData.value.length % availableNotes.value.length]
@@ -176,7 +160,6 @@ export const useSequenceStore = defineStore('sequence', () => {
   }
 
   //creates a sample object for toneJS to use in sequencer
-
   // sampleObject.value {
   //   A3: 'https://api-hitloop.responsible-it.nl/test_samples?sample_pack=b&file=crash_1_0_IJ-pont_varen.wav',
   //   B3: 'https://api-hitloop.responsible-it.nl/test_samples?sample_pack=b&file=crash_1_0_IJ-pont_varen.wav'
@@ -192,7 +175,6 @@ export const useSequenceStore = defineStore('sequence', () => {
     }
     return newObj
   })
-
 
   const playersMidiObject = computed(() => {
     const newObj = reactive({})
@@ -217,23 +199,20 @@ export const useSequenceStore = defineStore('sequence', () => {
     }
     return newObj
   })
-  // const sequenceData = computed(() => {
-  //   return sequenceData.value
-  // })
-  function toggleStep(row, step) {
-    return (row.steps[step] = !row.steps[step])
+
+  function toggleStep(item, step) {
+    return (item.steps[step] = !item.steps[step])
   }
+
   const updateSequenceURL = async (id, newUrl) => {
     return (sequenceData.value[id].url = newUrl)
   }
 
   const updateSequenceByValue = async (id, newValue) => {
-let newNum = useToNumber(newValue)
-    return sequenceData.value[id].sampleId = newNum
+    let newNum = useToNumber(newValue)
+    return (sequenceData.value[id].sampleId = newNum)
   }
 
-
-  
   const togglePlayPause = (val) => {
     isPlaying.value = !isPlaying.value
   }
