@@ -2,7 +2,6 @@
 <script async setup>
 import {
   ref,
-  reactive,
   watch,
   onMounted,
   onUnmounted,
@@ -24,8 +23,8 @@ import { createSequenceArrayIndex } from '@/helpers/toneHelpers.js'
 
 import BaseButton from '@/components/BaseButton.vue'
 import SequenceItem from '@/components/SequenceItem.vue'
-import SequenceItemControl from '@/components/SequenceItemControl.vue'
-import { useElementBounding, useShare, whenever } from '@vueuse/core'
+
+import { useElementBounding, useScroll, useShare, whenever } from '@vueuse/core'
 
 // store values to vuejs ref
 const {
@@ -35,8 +34,6 @@ const {
   sequenceData,
   isStarted,
   bpm,
-  reverb,
-  chorus,
   isSamplesLoaded
 } = storeToRefs(store)
 
@@ -216,15 +213,30 @@ function startShare() {
 }
 
 const controlRef = ref(null)
+const sequencerRef = ref(null)
+
+
 
 const controlHeight = computed(() => {
   const height = useElementBounding(controlRef).height.value
   return height + 'px'
 })
+
+
+const { x, y } = useScroll(sequencerRef);
+function clickAndScroll(e) {
+addSequence();
+
+
+
+return y.value = 100
+
+}
+
 </script>
 
 <template>
-  <div id="sequencer" v-if="sequenceData && store.sampleData">
+  <div id="sequencer" ref="sequencerRef" v-if="sequenceData && store.sampleData">
     <Suspense>
       <TransitionGroup name="fade" v-if="store.bufferLoaded.value">
         <SequenceItem
@@ -240,7 +252,7 @@ const controlHeight = computed(() => {
           <BaseButton
             icon="add"
             v-show="sequenceData.length !== availableNotes.length"
-            @click="addSequence()"
+            @click="clickAndScroll()"
           >
           </BaseButton>
         </div>

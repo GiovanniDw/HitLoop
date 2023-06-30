@@ -34,7 +34,7 @@ const {
   randomSequenceSteps
 } = store
 
-const itemData = toReactive(sequenceData.value[props.id])
+
 
 defineEmits(['update:volume', 'update:reverb'])
 
@@ -45,8 +45,6 @@ const closeModal = () => {
 }
 
 const isThisLoaded = ref(false)
-console.log('props.item')
-console.log(props.item)
 const sampleObject = computed(() => {
   let newObj = {}
   if (props.item) {
@@ -70,14 +68,6 @@ sampler = new Tone.Sampler({
   .toDestination()
   .sync()
 
-// sampler = new Tone.Sampler().toDestination().sync()
-
-// sampler.buffer = props.sampleFiles.get(props.item.sampleId)
-console.log('sampler.get(props.item.sampleId.toString())')
-console.log(sampler.get(props.item.sampleDataId))
-sampler.get(props.item.sampleId.toString())
-console.log('sampler.buffer')
-console.log(sampler.buffer)
 
 const currentStep = ref(currentStepIndex.value)
 const vol = new Tone.Volume(props.volume).toDestination()

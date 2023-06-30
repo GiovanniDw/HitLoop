@@ -77,20 +77,28 @@ function getEndAngle(index) {
 
 <style lang="scss" scoped>
 .arc-item {
-  stroke: #cbcbcb;
+  stroke: #fff ;
+  transition: all 0.5s;
 }
 .active {
   stroke-opacity: 50%;
-  stroke: #2ecd71;
+  stroke: var(--color-green);
 }
 
 .highlighted {
-  stroke-opacity: 50%;
+  // stroke-opacity: 50%;
+  stroke: var(--color-text)
 
   // stroke: green;
 }
 
 .highlighted.active {
   stroke-width: 22;
+  transform: scale(1.75);
+  stroke: var(--color-text)
 }
+
+
+
+
 </style>
