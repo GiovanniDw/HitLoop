@@ -83,6 +83,8 @@ function getEndAngle(index) {
 .active {
   stroke-opacity: 50%;
   stroke: var(--color-green);
+
+
 }
 
 .highlighted {
