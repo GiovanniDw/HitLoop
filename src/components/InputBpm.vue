@@ -26,28 +26,14 @@ const { moreBPM, lessBPM } = store
   <div class="input-group-v">
     <label for="bpm">BPM</label>
     <div>
-      <BaseButton icon="remove" @click="lessBPM"/>
-      <input id="bpm" type="number" min="20" max="300" step="5" v-model.number="bpm" />  
-      <BaseButton icon="add" @click="moreBPM"/>
+      <BaseButton icon="remove" @click="lessBPM" />
+      <input id="bpm" type="number" min="20" max="300" step="5" v-model.number="bpm" />
+      <BaseButton icon="add" @click="moreBPM" />
     </div>
-    
   </div>
 </template>
 
 <style lang="scss" scoped>
-input#bpm {
-  appearance: none;
-  border: 0;
-  color: var(--color-text);
-  background-color: var(--color-background);
-  font-size: 1.2em;
-  text-align: center;
-  min-width: 2.5em;
-  padding: .5em .5em;
-  display: block;
-  border-radius: 10px;
-  font-weight: 600;
-}
 div div {
   font-size: 1em;
   flex-direction: row;
@@ -56,12 +42,11 @@ div div {
   display: flex;
   flex-direction: column;
   font-size: 1em;
-  gap: .1em;
+  gap: 0.1em;
   position: relative;
-  
 }
 label {
-  font-size: .9em;
+  font-size: 0.9em;
   display: block;
   flex-shrink: 2;
   position: absolute;

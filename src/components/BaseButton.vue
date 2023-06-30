@@ -30,7 +30,7 @@ defineProps({
   justify-content: center;
   border-radius: 100%;
   color: var(--color-text);
-  .icon{
+  .icon {
     // font-size: inherit;
   }
 

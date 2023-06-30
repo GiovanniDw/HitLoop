@@ -34,8 +34,6 @@ defineProps({
 </template>
 
 <style lang="scss" scoped>
-
-
 .icon {
   // font-size: inherit;
   color: var(--color-text);

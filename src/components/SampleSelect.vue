@@ -14,11 +14,13 @@ const props = defineProps({
 const store = useSequenceStore()
 
 const { sampleData, sampleTypeList, sequenceData } = storeToRefs(store)
-
 </script>
 
 <template>
-  <select :v-model="item.sampleDataId" @change="$emit('change:sampleDataId', id, $event.target.value)">
+  <select
+    :v-model="item.sampleDataId"
+    @change="$emit('change:sampleDataId', id, $event.target.value)"
+  >
     <template v-for="sampleType in sampleTypeList" :key="sampleType">
       <optgroup :label="sampleType">
         <template v-for="sample in sampleData">
@@ -41,6 +43,6 @@ select {
   // color: var(--color-text);
 }
 option {
-  font-family: monospace;
+  font-family: 'Press Start 2P', Inter;
 }
 </style>

@@ -248,9 +248,6 @@ export const useSequenceStore = defineStore('sequence', () => {
     return newObj
   })
 
-
-
-
   const toggleStep = (item, step) => {
     return (item.steps[step] = !item.steps[step])
   }
@@ -433,6 +430,6 @@ export const useSequenceStore = defineStore('sequence', () => {
     pitchShiftValue,
     playersLoaded,
     bufferLoaded,
-    randomSequenceSteps,
+    randomSequenceSteps
   }
 })

@@ -1,5 +1,8 @@
 <script setup>
 import BaseButton from '@/components/BaseButton.vue'
+import { onClickOutside } from '@vueuse/core'
+import { Reverb } from 'tone'
+import { ref } from 'vue'
 
 const props = defineProps({
   show: Boolean
@@ -8,28 +11,23 @@ const props = defineProps({
 
 <template>
   <Transition name="modal">
-    <div v-if="show" class="modal-mask" v-on-click-outside="closeModal">
-      <div class="modal-container">
+    <div v-if="show" class="modal-mask" @click="$emit('close')">
+      <div class="modal-container" @click.stop="">
         <div class="modal-header">
           <slot name="header">default header</slot>
-          <BaseButton
-            icon="close"
-            class="modal-default-button"
-            @click="$emit('close')"
-          ></BaseButton>
+          <BaseButton icon="close" class="modal-default-button" @click="$emit('close')" />
         </div>
         <div class="modal-body">
-          <slot name="body"></slot>
-        </div>
-        <div class="modal-footer">
-          <slot name="footer"> </slot>
+          <div class="left"><slot name="body"></slot></div>
+
+          <div class="right"><slot name="arc"></slot></div>
         </div>
       </div>
     </div>
   </Transition>
 </template>
 
-<style>
+<style lang="scss" scoped>
 .modal-mask {
   position: fixed;
   z-index: 9998;
@@ -46,8 +44,9 @@ const props = defineProps({
 }
 
 .modal-container {
-  width: 50%;
-  height: 50%;
+  min-width: 50%;
+  // min-height: 50%;
+  height: auto;
   z-index: 9999;
   /* margin-top: auto; */
   padding: 2em 2em;
@@ -66,13 +65,25 @@ const props = defineProps({
 }
 
 .modal-body {
+  // height: 1em;
   margin: 20px 0;
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+
+  align-items: center;
+  .left {
+    flex-wrap: wrap;
+  }
+  .right {
+    width: 200px;
+  }
 }
 
 .modal-default-button {
   position: absolute;
-  top: 2em;
-  right: 2em;
+  top: 1.5em;
+  right: 1.5em;
 }
 
 /*

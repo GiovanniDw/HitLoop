@@ -40,6 +40,10 @@ defineEmits(['update:volume', 'update:reverb'])
 
 let sequence = null
 const showModal = ref(false)
+const closeModal = () => {
+  return (showModal.value = false)
+}
+
 const isThisLoaded = ref(false)
 console.log('props.item')
 console.log(props.item)
@@ -79,10 +83,6 @@ const currentStep = ref(currentStepIndex.value)
 const vol = new Tone.Volume(props.volume).toDestination()
 let rev = new Tone.Reverb({
   ready: () => {
-
-
-
-
     // if (props.reverb !== 0) {
     //   // console.log(sampler.connect(rev))
     //   sampler.connect(rev)
@@ -94,15 +94,10 @@ let rev = new Tone.Reverb({
   }
 }).toDestination()
 
-
-
-
-
 const tick = (time, col) => {
   console.log(rev.get())
 
   if (props.reverb >= 0.001) {
-    
     // sampler.connect(rev)
     // rev.set({ decay: props.reverb })
   } else {
@@ -114,7 +109,7 @@ const tick = (time, col) => {
   sampler.connect(vol)
 
   if (props.item.steps[col] === true) {
-      sampler.triggerAttackRelease(props.item.sampleId, '16n', time)
+    sampler.triggerAttackRelease(props.item.sampleId, '16n', time)
   }
 }
 
@@ -156,16 +151,14 @@ watch(
 watch(
   () => props.reverb,
   (newRev) => {
-console.log(newRev)
+    console.log(newRev)
 
     if (newRev > 0.001 && newRev !== 0 && newRev !== null) {
       rev.set({ decay: newRev })
       sampler.connect(rev)
-      
     } else {
       sampler.disconnect(rev)
     }
-
   }
 )
 
@@ -193,12 +186,7 @@ onUnmounted(() => {
       <p>{{ item.sampleName }}</p>
     </div>
     <div class="sequence-item-wrapper">
-      <BaseButton
-        icon="tune"
-        class="btn-icon"
-        id="show-modal"
-        @click="showModal = true"
-      ></BaseButton>
+      <BaseButton icon="tune" class="btn-icon" id="show-modal" @click="showModal = true" />
       <slot></slot>
       <slot name="steps">
         <SequenceSteps
@@ -219,58 +207,74 @@ onUnmounted(() => {
         <BaseButton @click="removeSequence(id)" icon="delete" />
       </div>
 
-    <Teleport to="main" v-if="!empty">
-      <!-- use the modal component, pass in the prop -->
-      <Modal :show="showModal" @close="showModal = false">
-        <template #header>
-          <h3>Edit sound</h3>
-        </template>
-        <template #body>
-          <div class="input-group">
-            <label for="reverb">Sample:</label>
-            <Suspense>
-              <SampleSelect
-                class="sample-select"
-                :value="item.sampleDataId"
-                @update:url="updateSequenceURL(id, $event)"
-                @change:sampleDataId="updateSequenceSample"
-                :item="item"
-                :id="id"
+      <Teleport to="main" v-if="!empty">
+        <!-- use the modal component, pass in the prop -->
+        <Modal :show="showModal" @close="showModal = false" @closeModal="closeModal">
+          <template #header>
+            <h3>Edit sound</h3>
+          </template>
+          <template #body>
+            <div class="input-group">
+              <label class="input-label" for="reverb">Sample:</label>
+              <Suspense>
+                <SampleSelect
+                  class="sample-select"
+                  :value="item.sampleDataId"
+                  @update:url="updateSequenceURL(id, $event)"
+                  @change:sampleDataId="updateSequenceSample"
+                  :item="item"
+                  :id="id"
+                />
+              </Suspense>
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="reverb">Reverb:</label>
+              <input
+                id="reverb"
+                type="number"
+                min="0"
+                max="10"
+                @change="$emit('update:reverb', $event.target.value)"
+                :value="reverb"
+                step="0.1"
               />
-            </Suspense>
-          </div>
-          <div class="input-group">
-            <label for="reverb">Reverb:</label>
-            <input
-              id="reverb"
-              type="number"
-              min="0"
-              max="10"
-              @change="$emit('update:reverb', $event.target.value)"
-              :value="reverb"
-              step="0.1"
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="volume">Volume:</label>
+              <input
+                id="volume"
+                type="range"
+                min="-70"
+                max="0"
+                @input="$emit('update:volume', $event.target.value)"
+                :value="volume"
+                step="1"
+              />
+            </div>
+          </template>
+          <template #arc>
+            <SequenceItemArc
+              :columns="columns"
+              :row="item"
+              :highlighted="highlighted"
+              @toggle-step="toggleStep"
             />
-          </div>
-          <div class="input-group">
-            <label for="volume">Volume:</label>
-            <input
-              id="volume"
-              type="range"
-              min="-70"
-              max="0"
-              @input="$emit('update:volume', $event.target.value)"
-              :value="volume"
-              step="1"
-            />
-          </div>
-        </template>
-      </Modal>
-    </Teleport>
-  </div>
+          </template>
+        </Modal>
+      </Teleport>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+input[type='range']::-webkit-slider-thumb {
+  width: 10px;
+  -webkit-appearance: none;
+  height: 10px;
+  cursor: ew-resize;
+  background: #434343;
+}
+
 .sequence-item {
   // grid-template-columns:auto 1fr auto;
   display: flex;
@@ -286,6 +290,10 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  transition: all 0.5ms;
+  @media only screen and (max-width: 790px) {
+    flex-wrap: wrap;
+  }
 }
 
 .sample-select {
@@ -298,5 +306,14 @@ onUnmounted(() => {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
+  flex-direction: row;
+  // flex-wrap: wrap;
+
+  label.input-label {
+    font-size: 16px;
+  }
+  @media only screen and (max-width: 400px) {
+    flex-direction: column;
+  }
 }
 </style>
