@@ -1,4 +1,6 @@
+<img align="left" width="80" height="80" src="./src/assets/Logo.svg" alt="Resume application project app icon">
 # HitLoop
+  
 <img width="1420" alt="image" src="https://github.com/GiovanniDw/HitLoop/assets/10939082/bea9cb4a-1f24-4b50-800a-dba4f1c38167">
 
 ## Assignment
