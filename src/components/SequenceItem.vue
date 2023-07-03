@@ -34,17 +34,15 @@ const {
   randomSequenceSteps
 } = store
 
-
+const itemData = toReactive(sequenceData.value[props.id])
 
 defineEmits(['update:volume', 'update:reverb'])
 
 let sequence = null
 const showModal = ref(false)
-const closeModal = () => {
-  return (showModal.value = false)
-}
-
 const isThisLoaded = ref(false)
+console.log('props.item')
+console.log(props.item)
 const sampleObject = computed(() => {
   let newObj = {}
   if (props.item) {
@@ -68,6 +66,14 @@ sampler = new Tone.Sampler({
   .toDestination()
   .sync()
 
+// sampler = new Tone.Sampler().toDestination().sync()
+
+// sampler.buffer = props.sampleFiles.get(props.item.sampleId)
+console.log('sampler.get(props.item.sampleId.toString())')
+console.log(sampler.get(props.item.sampleDataId))
+sampler.get(props.item.sampleId.toString())
+console.log('sampler.buffer')
+console.log(sampler.buffer)
 
 const currentStep = ref(currentStepIndex.value)
 const vol = new Tone.Volume(props.volume).toDestination()
@@ -173,10 +179,17 @@ onUnmounted(() => {
 <template>
   <div class="sequence-item">
     <div class="sequence-title-wrapper">
-      <p>{{ item.sampleName }}</p>
+      <p>
+        Sample: <span class="active-sample-title">{{ item.sampleName }}</span>
+      </p>
     </div>
     <div class="sequence-item-wrapper">
-      <BaseButton icon="tune" class="btn-icon" id="show-modal" @click="showModal = true" />
+      <BaseButton
+        icon="tune"
+        class="btn-icon"
+        id="show-modal"
+        @click="showModal = true"
+      ></BaseButton>
       <slot></slot>
       <slot name="steps">
         <SequenceSteps
@@ -199,13 +212,13 @@ onUnmounted(() => {
 
       <Teleport to="main" v-if="!empty">
         <!-- use the modal component, pass in the prop -->
-        <Modal :show="showModal" @close="showModal = false" @closeModal="closeModal">
+        <Modal :show="showModal" @close="showModal = false">
           <template #header>
             <h3>Edit sound</h3>
           </template>
           <template #body>
             <div class="input-group">
-              <label class="input-label" for="reverb">Sample:</label>
+              <label for="reverb">Sample:</label>
               <Suspense>
                 <SampleSelect
                   class="sample-select"
@@ -218,19 +231,19 @@ onUnmounted(() => {
               </Suspense>
             </div>
             <div class="input-group">
-              <label class="input-label" for="reverb">Reverb:</label>
+              <label for="reverb">Reverb:</label>
               <input
                 id="reverb"
-                type="number"
+                type="range"
                 min="0"
                 max="10"
                 @change="$emit('update:reverb', $event.target.value)"
                 :value="reverb"
-                step="0.1"
+                step="0.5"
               />
             </div>
             <div class="input-group">
-              <label class="input-label" for="volume">Volume:</label>
+              <label for="volume">Volume:</label>
               <input
                 id="volume"
                 type="range"
@@ -242,14 +255,6 @@ onUnmounted(() => {
               />
             </div>
           </template>
-          <template #arc>
-            <SequenceItemArc
-              :columns="columns"
-              :row="item"
-              :highlighted="highlighted"
-              @toggle-step="toggleStep"
-            />
-          </template>
         </Modal>
       </Teleport>
     </div>
@@ -257,14 +262,6 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss" scoped>
-input[type='range']::-webkit-slider-thumb {
-  width: 10px;
-  -webkit-appearance: none;
-  height: 10px;
-  cursor: ew-resize;
-  background: #434343;
-}
-
 .sequence-item {
   // grid-template-columns:auto 1fr auto;
   display: flex;
@@ -280,10 +277,6 @@ input[type='range']::-webkit-slider-thumb {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  transition: all 0.5ms;
-  @media only screen and (max-width: 790px) {
-    flex-wrap: wrap;
-  }
 }
 
 .sample-select {
@@ -296,14 +289,11 @@ input[type='range']::-webkit-slider-thumb {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
-  flex-direction: row;
-  // flex-wrap: wrap;
+}
 
-  label.input-label {
-    font-size: 16px;
-  }
-  @media only screen and (max-width: 400px) {
-    flex-direction: column;
-  }
+.active-sample-title {
+  color: #2ecd71;
+  text-transform: uppercase;
 }
 </style>
+ 
